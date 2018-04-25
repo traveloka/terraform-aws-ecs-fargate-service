@@ -12,7 +12,7 @@ data "template_file" "container_definition" {
   template = "${var.container_definition_template != "" ? var.container_definition_template : file("${path.module}/templates/container-definition.json")}"
 
   vars {
-    aws_region     = "${var.aws_region}"
+    aws_region     = "${data.aws_region.current.name}"
     container_name = "${var.main_container_name}"
     image_name     = "${var.image_name}"
     version        = "${var.service_version}"

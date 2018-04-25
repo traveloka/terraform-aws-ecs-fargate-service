@@ -7,7 +7,7 @@ resource "aws_ecs_service" "app" {
   cluster         = "${data.aws_ecs_cluster.main.arn}"
   task_definition = "${aws_ecs_task_definition.app.arn}"
   desired_count   = "${var.capacity}"
-  iam_role        = "${aws_iam_role.ecs_service.arn}"
+  iam_role        = "${module.service_role.role_arn}"
 
   placement_strategy {
     type  = "spread"
