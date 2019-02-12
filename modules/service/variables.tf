@@ -73,12 +73,6 @@ variable "capacity" {
   default     = 2
 }
 
-variable "health_check_path" {
-  description = "Destination for the health check request"
-  type        = "string"
-  default     = "/healthcheck"
-}
-
 variable "log_group_name" {
   description = "AWS CloudWatch Log Group for storing task log"
   type        = "string"

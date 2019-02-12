@@ -1,19 +1,21 @@
-.PHONY: autoformat validate check-format
+MAKEFLAGS += --silent
+PHONY: autoformat validate check-format
 
 autoformat:
 	terraform fmt
 
-init: .terraform
-.terraform:
-	terraform init -input=false
-
-validate: .terraform
-	find . -type f -name "*.tf" -exec dirname {} \; | sort -u | while read m; do \
+TEST_TFVARS_FILE=test.tfvars
+validate:
+	find . -type f -name "$(TEST_TFVARS_FILE)" -exec dirname {} \;  | grep -v ".terraform" | sort -u | while read m; do \
 		echo -n "Checking '$$m': "; \
-		(terraform validate -check-variables=false "$$m" && echo "√") || exit 1 ; \
+		( \
+			cd "$$m" && \
+			terraform init -backend=false -input=false > /dev/null && \
+			terraform validate -var-file "$(TEST_TFVARS_FILE)" \
+		) && echo "[✔]" || exit 1 ; \
 	done
 
-check-format: .terraform
+check-format:
 	if ! terraform fmt --check --diff; then \
 		echo "Some terraform files need be formatted, run 'make autoformat' to fix"; \
 		exit 1; \

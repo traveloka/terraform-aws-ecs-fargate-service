@@ -1,7 +1,9 @@
 resource "aws_ecs_task_definition" "app" {
-  family                = "${var.product_domain}-${var.service_name}"
+  family                = "${var.task_name}"
   container_definitions = "${data.template_file.container_definition.rendered}"
   task_role_arn         = "${var.task_role}"
+
+  requires_compatibilities = "${list(var.enable_ec2 ? "EC2" : "", var.enable_farget ? "FARGATE" : "")}"
 
   lifecycle {
     create_before_destroy = true
