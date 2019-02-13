@@ -1,5 +1,6 @@
 MAKEFLAGS += --silent
-PHONY: autoformat validate check-format
+
+AWS_REGION = ap-southeast-1
 
 autoformat:
 	terraform fmt
@@ -10,6 +11,7 @@ validate:
 		echo -n "Checking '$$m': "; \
 		( \
 			cd "$$m" && \
+			export AWS_REGION=$(AWS_REGION) && \
 			terraform init -backend=false -input=false > /dev/null && \
 			terraform validate -var-file "$(TEST_TFVARS_FILE)" \
 		) && echo "[✔]" || exit 1 ; \
@@ -28,3 +30,5 @@ setup-git-hook: .git/hooks/pre-commit
 	echo "#!/bin/sh" > $@
 	echo "terraform fmt | xargs git add" >> $@
 	chmod +x $@
+
+PHONY: autoformat validate check-format

@@ -11,10 +11,8 @@ jobs:
           name: install make
           command: apk add -U make
       - run:
-          name: Validate Terraform configurations
-          command: make validate
-          environment:
-            AWS_REGION: ap-southeast-1
-      - run:
           name: Check if Terraform configurations are properly formatted
           command: make check-format
+      - run:
+          name: Validate Terraform configurations
+          command: make validate
