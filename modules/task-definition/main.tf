@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 resource "aws_ecs_task_definition" "app" {
   family                = "${var.task_name}"
   container_definitions = "${data.template_file.container_definition.rendered}"
@@ -11,7 +13,7 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 data "template_file" "container_definition" {
-  template = "${var.container_definition_template != "" ? var.container_definition_template : file("${path.module}/templates/container-definition.json")}"
+  template = "${var.container_definition_template != "" ? var.container_definition_template : file("${path.module}/templates/container-definition.json.tpl")}"
 
   vars {
     aws_region     = "${data.aws_region.current.name}"
@@ -27,10 +29,4 @@ data "template_file" "container_definition" {
 resource "aws_cloudwatch_log_group" "service_log" {
   name              = "${var.log_group_name}"
   retention_in_days = "${var.log_retention}"
-
-  tags {
-    Service       = "${var.service_name}"
-    Environment   = "${var.environment}"
-    ProductDomain = "${var.product_domain}"
-  }
 }
