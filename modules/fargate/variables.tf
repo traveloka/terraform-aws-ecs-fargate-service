@@ -8,13 +8,8 @@ variable "cluster_name" {
   type        = "string"
 }
 
-variable "task_definition" {
-  description = "The family and revision (family:revision ) or full ARN of the task definition to run in your service"
-  type        = "string"
-}
-
 variable "platform_version" {
-  description = "The family and revision (family:revision ) or full ARN of the task definition to run in your service"
+  description = "The platform version on which to run your service."
   type        = "string"
   default     = "LATEST"
 }
@@ -56,4 +51,49 @@ variable "assign_public_ip" {
   description = "Assign a public IP address to the ENI"
   type        = "string"
   default     = "false"
+}
+
+variable "log_group_name" {
+  type        = "string"
+  description = "CloudWatch log group name where the service log place"
+}
+
+variable "log_retention" {
+  type        = "string"
+  default     = 30
+  description = "The number of day the logs will be keept"
+}
+
+variable "container_definition_template" {
+  type        = "string"
+  default     = ""
+  description = "Custom container definition template"
+}
+
+variable "image_name" {
+  type        = "string"
+  description = "The name of docker image that will be used by this service"
+}
+
+variable "task_role" {
+  default     = ""
+  description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services."
+}
+
+variable "environment" {
+  type        = "list"
+  default     = []
+  description = "Environment variables for the task"
+}
+
+variable "cpu" {
+  description = "The number of cpu units used by the task."
+  default     = "1"
+  type        = "string"
+}
+
+variable "memory" {
+  description = "The amount (in MiB) of memory used by the task."
+  default     = "1024"
+  type        = "string"
 }

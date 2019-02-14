@@ -1,11 +1,9 @@
 [
   {
     "name": "${container_name}",
-    "image": "${image_name}:${version}",
+    "image": "${image_name}",
     "essential": true,
-    "environment": [
-      { "name": "PORT", "value": "${port}" }
-    ],
+    "environment": ${environment},
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
