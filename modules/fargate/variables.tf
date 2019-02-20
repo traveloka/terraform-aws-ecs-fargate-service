@@ -25,6 +25,16 @@ variable "target_group" {
   type        = "string"
 }
 
+variable "image_name" {
+  type        = "string"
+  description = "The name of docker image that will be used by this service"
+}
+
+variable "service_version" {
+  type        = "string"
+  description = "The tag of the docker version to run "
+}
+
 variable "main_container_name" {
   description = "Name of the container name that will be registered to target group"
   type        = "string"
@@ -70,14 +80,16 @@ variable "container_definition_template" {
   description = "Custom container definition template"
 }
 
-variable "image_name" {
-  type        = "string"
-  description = "The name of docker image that will be used by this service"
-}
-
 variable "task_role" {
+  type        = "string"
   default     = ""
   description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services."
+}
+
+variable "execution_role_name" {
+  type        = "string"
+  default     = "ecsTaskExecutionRole"
+  description = "The name of the execution role that will be used by fargate to run tasks"
 }
 
 variable "environment" {
@@ -88,7 +100,7 @@ variable "environment" {
 
 variable "cpu" {
   description = "The number of cpu units used by the task."
-  default     = "1"
+  default     = "1024"
   type        = "string"
 }
 

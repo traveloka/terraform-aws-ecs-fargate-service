@@ -6,12 +6,11 @@ resource "aws_ecs_service" "app" {
   launch_type      = "FARGATE"
   platform_version = "${var.platform_version}"
 
-  iam_role        = "${data.aws_iam_role.ecs_service_role.arn}"
   task_definition = "${aws_ecs_task_definition.app.arn}"
 
   network_configuration {
-    subnets          = "${var.subnets}"
-    security_groups  = "${var.security_groups}"
+    subnets          = ["${var.subnets}"]
+    security_groups  = ["${var.security_groups}"]
     assign_public_ip = "${var.assign_public_ip}"
   }
 
@@ -35,6 +34,8 @@ resource "aws_ecs_task_definition" "app" {
   task_role_arn         = "${var.task_role}"
 
   requires_compatibilities = ["FARGATE"]
+  execution_role_arn       = "${data.aws_iam_role.execution_role.arn}"
+  network_mode             = "awsvpc"
 
   cpu    = "${var.cpu}"
   memory = "${var.memory}"
@@ -51,6 +52,7 @@ data "template_file" "container_definition" {
     aws_region     = "${data.aws_region.current.name}"
     container_name = "${var.main_container_name}"
     image_name     = "${var.image_name}"
+    version        = "${var.service_version}"
     port           = "${var.service_port}"
     log_group      = "${aws_cloudwatch_log_group.service_log.name}"
     environment    = "${jsonencode(var.environment)}"

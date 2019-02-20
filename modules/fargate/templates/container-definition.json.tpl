@@ -1,7 +1,7 @@
 [
   {
     "name": "${container_name}",
-    "image": "${image_name}",
+    "image": "${image_name}:${version}",
     "essential": true,
     "environment": ${environment},
     "logConfiguration": {
