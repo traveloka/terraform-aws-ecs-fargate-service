@@ -20,7 +20,7 @@ locals {
 }
 
 module "service" {
-  source = "../../modules/fargate"
+  source = "../.."
 
   service_name = "${local.service_name}"
   cluster_name = "${local.cluster_name}"
@@ -132,7 +132,7 @@ resource "aws_security_group_rule" "egress_app_from_lb" {
 resource "aws_security_group_rule" "ingress_lb_from_office" {
   type              = "ingress"
   security_group_id = "${aws_security_group.lb.id}"
-  cidr_blocks       = ["10.0.0.0/8", "192.168.0.0/16"]
+  cidr_blocks       = ["10.0.0.0/8"]
   from_port         = "443"
   to_port           = "443"
   protocol          = "tcp"
