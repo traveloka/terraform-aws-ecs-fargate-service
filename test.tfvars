@@ -16,7 +16,9 @@ security_groups = ["sg-00000001"]
 
 assign_public_ip = false
 
-image_name = "traveloka/test-app:1"
+image_name = "traveloka/test-app"
+
+service_version = "latest"
 
 log_retention = "30"
 
