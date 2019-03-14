@@ -1,6 +1,12 @@
 service_name = "test-service"
 
-cluster_name = "test-cluster"
+cluster_role = "fe"
+
+product_domain = "abc"
+
+environment = "staging"
+
+ecs_cluster = "webecs"
 
 capacity = "5"
 

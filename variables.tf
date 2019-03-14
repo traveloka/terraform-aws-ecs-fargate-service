@@ -3,8 +3,24 @@ variable "service_name" {
   type        = "string"
 }
 
-variable "cluster_name" {
-  description = "Name of the cluster to which the service belongs"
+variable "cluster_role" {
+  description = "The role of the cluster in the service"
+  type        = "string"
+}
+
+variable "product_domain" {
+  description = "The product domain that this service belongs to"
+  type        = "string"
+}
+
+variable "environment" {
+  description = "Environment where the service run"
+  type        = "string"
+  default     = "development"
+}
+
+variable "ecs_cluster" {
+  description = "Name of the cluster to which the ECS service belongs"
   type        = "string"
 }
 
@@ -31,7 +47,7 @@ variable "image_name" {
 }
 
 variable "service_version" {
-  description = "The tag of the docker version to run "
+  description = "The tag of the docker version to run"
   type        = "string"
 }
 
@@ -45,6 +61,12 @@ variable "service_port" {
   description = "Port on which the container app run"
   type        = "string"
   default     = 80
+}
+
+variable "health_check_grace_period_seconds" {
+  description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown."
+  type        = "string"
+  default     = 0
 }
 
 variable "subnets" {
@@ -92,7 +114,7 @@ variable "execution_role_name" {
   default     = "ecsTaskExecutionRole"
 }
 
-variable "environment" {
+variable "environment_variables" {
   description = "Environment variables for the task"
   type        = "list"
   default     = []
@@ -108,4 +130,22 @@ variable "memory" {
   description = "The amount (in MiB) of memory used by the task."
   type        = "string"
   default     = "1024"
+}
+
+variable "service_tags" {
+  description = "Custom tags for ECS Service"
+  type        = "map"
+  default     = {}
+}
+
+variable "taskdef_tags" {
+  description = "Custom tags for ECS Task Definition"
+  type        = "map"
+  default     = {}
+}
+
+variable "log_tags" {
+  description = "Custom tags for CloudWatch Log Group"
+  type        = "map"
+  default     = {}
 }

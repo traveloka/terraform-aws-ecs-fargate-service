@@ -1,12 +1,54 @@
+locals {
+  cluster = "${var.service_name}-${var.cluster_role}"
+
+  global_tags = {
+    Service       = "${var.service_name}"
+    Cluster       = "${local.cluster}"
+    ProductDomain = "${var.product_domain}"
+    Environment   = "${var.environment}"
+    ManagedBy     = "terraform"
+  }
+
+  service_tags = {
+    Name = "${module.service_name.name}"
+  }
+
+  taskdef_tags = {
+    Name = "${module.taskdef_name.name}"
+  }
+}
+
+module "service_name" {
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.9.0"
+
+  name_prefix = "${local.cluster}"
+
+  //////////////////////////////////////////////////////////////////////////////////
+  // WIP: wait for https://github.com/traveloka/terraform-aws-resource-naming/pull/13
+  resource_type = "lambda_function"
+}
+
+module "taskdef_name" {
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.9.0"
+
+  name_prefix = "${local.cluster}"
+
+  //////////////////////////////////////////////////////////////////////////////////
+  // WIP: wait for https://github.com/traveloka/terraform-aws-resource-naming/pull/13
+  resource_type = "lambda_function"
+}
+
 resource "aws_ecs_service" "app" {
-  name          = "${var.service_name}"
-  cluster       = "${data.aws_ecs_cluster.main.arn}"
+  name          = "${module.service_name.name}"
+  cluster       = "${var.ecs_cluster}"
   desired_count = "${var.capacity}"
 
   launch_type      = "FARGATE"
   platform_version = "${var.platform_version}"
 
   task_definition = "${aws_ecs_task_definition.app.arn}"
+
+  health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
   network_configuration {
     subnets          = ["${var.subnets}"]
@@ -20,6 +62,9 @@ resource "aws_ecs_service" "app" {
     container_port   = "${var.service_port}"
   }
 
+  propagate_tags = "SERVICE"
+  tags           = "${merge(local.global_tags, local.service_tags, var.service_tags)}"
+
   lifecycle {
     ignore_changes = [
       "desired_count",
@@ -29,7 +74,7 @@ resource "aws_ecs_service" "app" {
 }
 
 resource "aws_ecs_task_definition" "app" {
-  family                = "${var.service_name}"
+  family                = "${module.taskdef_name.name}"
   container_definitions = "${data.template_file.container_definition.rendered}"
   task_role_arn         = "${var.task_role}"
 
@@ -39,6 +84,8 @@ resource "aws_ecs_task_definition" "app" {
 
   cpu    = "${var.cpu}"
   memory = "${var.memory}"
+
+  tags = "${merge(local.global_tags, local.taskdef_tags, var.taskdef_tags)}"
 
   lifecycle {
     create_before_destroy = true
@@ -55,11 +102,13 @@ data "template_file" "container_definition" {
     version        = "${var.service_version}"
     port           = "${var.service_port}"
     log_group      = "${aws_cloudwatch_log_group.service_log.name}"
-    environment    = "${jsonencode(var.environment)}"
+    environment    = "${jsonencode(var.environment_variables)}"
   }
 }
 
 resource "aws_cloudwatch_log_group" "service_log" {
   name              = "${var.log_group_name}"
   retention_in_days = "${var.log_retention}"
+
+  tags = "${merge(local.global_tags, var.log_tags)}"
 }
