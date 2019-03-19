@@ -19,23 +19,17 @@ locals {
 }
 
 module "service_name" {
-  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.9.0"
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
 
-  name_prefix = "${local.cluster}"
-
-  //////////////////////////////////////////////////////////////////////////////////
-  // WIP: wait for https://github.com/traveloka/terraform-aws-resource-naming/pull/13
-  resource_type = "lambda_function"
+  name_prefix   = "${local.cluster}"
+  resource_type = "ecs_service"
 }
 
 module "taskdef_name" {
-  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.9.0"
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
 
-  name_prefix = "${local.cluster}"
-
-  //////////////////////////////////////////////////////////////////////////////////
-  // WIP: wait for https://github.com/traveloka/terraform-aws-resource-naming/pull/13
-  resource_type = "lambda_function"
+  name_prefix   = "${local.cluster}"
+  resource_type = "ecs_task_definition"
 }
 
 resource "aws_ecs_service" "app" {
