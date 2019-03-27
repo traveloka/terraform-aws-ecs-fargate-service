@@ -6,7 +6,7 @@ locals {
     Cluster       = "${local.cluster}"
     ProductDomain = "${var.product_domain}"
     Environment   = "${var.environment}"
-    ManagedBy     = "terraform"
+    ManagedBy     = "Terraform"
   }
 
   service_tags = {
@@ -32,28 +32,28 @@ module "taskdef_name" {
   resource_type = "ecs_task_definition"
 }
 
-resource "aws_ecs_service" "app" {
+resource "aws_ecs_service" "ecs_service" {
   name          = "${module.service_name.name}"
-  cluster       = "${var.ecs_cluster}"
+  cluster       = "${var.ecs_cluster_arn}"
   desired_count = "${var.capacity}"
 
   launch_type      = "FARGATE"
   platform_version = "${var.platform_version}"
 
-  task_definition = "${aws_ecs_task_definition.app.arn}"
+  task_definition = "${aws_ecs_task_definition.task_def.arn}"
 
   health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
   network_configuration {
-    subnets          = ["${var.subnets}"]
-    security_groups  = ["${var.security_groups}"]
+    subnets          = ["${var.subnet_ids}"]
+    security_groups  = ["${var.security_group_ids}"]
     assign_public_ip = "${var.assign_public_ip}"
   }
 
   load_balancer {
     target_group_arn = "${var.target_group}"
     container_name   = "${var.main_container_name}"
-    container_port   = "${var.service_port}"
+    container_port   = "${var.container_port}"
   }
 
   propagate_tags = "SERVICE"
@@ -67,13 +67,13 @@ resource "aws_ecs_service" "app" {
   }
 }
 
-resource "aws_ecs_task_definition" "app" {
+resource "aws_ecs_task_definition" "task_def" {
   family                = "${module.taskdef_name.name}"
   container_definitions = "${data.template_file.container_definition.rendered}"
-  task_role_arn         = "${var.task_role}"
+  task_role_arn         = "${var.task_role_arn}"
 
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = "${data.aws_iam_role.execution_role.arn}"
+  execution_role_arn       = "${var.task_execution_role_arn}"
   network_mode             = "awsvpc"
 
   cpu    = "${var.cpu}"
@@ -93,15 +93,15 @@ data "template_file" "container_definition" {
     aws_region     = "${data.aws_region.current.name}"
     container_name = "${var.main_container_name}"
     image_name     = "${var.image_name}"
-    version        = "${var.service_version}"
-    port           = "${var.service_port}"
-    log_group      = "${aws_cloudwatch_log_group.service_log.name}"
+    version        = "${var.image_version}"
+    port           = "${var.container_port}"
+    log_group      = "${aws_cloudwatch_log_group.log_group.name}"
     environment    = "${jsonencode(var.environment_variables)}"
   }
 }
 
-resource "aws_cloudwatch_log_group" "service_log" {
-  name              = "${var.log_group_name}"
+resource "aws_cloudwatch_log_group" "log_group" {
+  name              = "/tvlk/${var.log_group_name}"
   retention_in_days = "${var.log_retention}"
 
   tags = "${merge(local.global_tags, var.log_tags)}"
