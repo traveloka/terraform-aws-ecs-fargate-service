@@ -2,30 +2,32 @@ service_name = "test-service"
 
 cluster_role = "fe"
 
+application = "nodejs"
+
 product_domain = "abc"
 
 environment = "staging"
 
-ecs_cluster = "webecs"
+ecs_cluster_arn = "arn:aws:ecs:ap-southeast-1:123456789012:cluster/abc-3c5ef0d4876eed93"
 
 capacity = "5"
 
-target_group = "arn:aws:elasticloadbalancing:ap-southeast-1:123456789012:targetgroup/test-tg/1234567890abcdef"
+target_group_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:123456789012:targetgroup/test-tg/1234567890abcdef"
 
 main_container_name = "app"
 
-service_port = "80"
+container_port = "80"
 
-subnets = ["subnet-00000001", "subnet-00000002", "subnet-00000003"]
+subnet_ids = ["subnet-00000001", "subnet-00000002", "subnet-00000003"]
 
-security_groups = ["sg-00000001"]
+security_group_ids = ["sg-00000001"]
 
 assign_public_ip = false
 
+task_execution_role_arn = "arn:aws:iam::123456789012:role/service-role/ecs-tasks.amazonaws.com/ServiceRoleForEcs-Tasks_test-execution-1b5e77c7a347fc2b"
+
 image_name = "traveloka/test-app"
 
-service_version = "latest"
+image_version = "latest"
 
-log_retention = "30"
-
-log_group_name = "/ecs/test-app"
+log_retention = "14"

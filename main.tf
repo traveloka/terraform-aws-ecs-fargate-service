@@ -4,6 +4,7 @@ locals {
   global_tags = {
     Service       = "${var.service_name}"
     Cluster       = "${local.cluster}"
+    Application   = "${var.application}"
     ProductDomain = "${var.product_domain}"
     Environment   = "${var.environment}"
     ManagedBy     = "Terraform"
@@ -51,7 +52,7 @@ resource "aws_ecs_service" "ecs_service" {
   }
 
   load_balancer {
-    target_group_arn = "${var.target_group}"
+    target_group_arn = "${var.target_group_arn}"
     container_name   = "${var.main_container_name}"
     container_port   = "${var.container_port}"
   }
@@ -101,8 +102,8 @@ data "template_file" "container_definition" {
 }
 
 resource "aws_cloudwatch_log_group" "log_group" {
-  name              = "/tvlk/${var.log_group_name}"
-  retention_in_days = "${var.log_retention}"
+  name              = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}/${var.main_container_name}"
+  retention_in_days = "${var.log_retention_in_days}"
 
   tags = "${merge(local.global_tags, var.log_tags)}"
 }

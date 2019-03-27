@@ -8,6 +8,11 @@ variable "cluster_role" {
   type        = "string"
 }
 
+variable "application" {
+  description = "Application type that the ASG's instances will serve"
+  type        = "string"
+}
+
 variable "product_domain" {
   description = "The product domain that this service belongs to"
   type        = "string"
