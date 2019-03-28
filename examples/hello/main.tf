@@ -4,45 +4,57 @@ provider "aws" {
 
 locals {
   service_name   = "webdemo"
-  cluster_name   = "webecs"
+  cluster_role   = "fe"
   product_domain = "web"
+
+  ecs_cluster_name = "webecs"
 
   image_name = "1234567890ab.dkr.ecr.ap-southeast-1.amazonaws.com/webdemo"
 
-  service_port = 3000
+  container_port = 3000
 
   cpu    = 256
   memory = 512
 
-  log_group = "/ecs/${local.service_name}"
-
   tg_deregistration_delay = 90
+
+  autoscaling_target_rpm = 3000 # = 50 req/s
+  autoscaling_target_cpu = 75   # %
 }
 
 module "service" {
   source = "../.."
 
-  service_name = "${local.service_name}"
-  cluster_name = "${local.cluster_name}"
-  target_group = "${module.lb.tg_arn}"
+  service_name   = "${local.service_name}"
+  cluster_role   = "${local.cluster_role}"
+  application    = "nodejs"
+  product_domain = "web"
+  environment    = "${var.environment}"
 
-  image_name      = "${local.image_name}"
-  service_version = "latest"
-  service_port    = "${local.service_port}"
+  ecs_cluster_arn = "${local.ecs_cluster_name}"
+
+  capacity       = 3
+  image_name     = "${local.image_name}"
+  image_version  = "latest"
+  container_port = "${local.container_port}"
+
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/service-role/ecs-tasks.amazonaws.com/ServiceRoleForEcs-Tasks_webdemo-execution-1b5e77c7a347fc2b"
 
   cpu    = "${local.cpu}"
   memory = "${local.memory}"
 
-  subnets         = "${var.subnets}"
-  security_groups = ["${aws_security_group.app.id}"]
-  log_group_name  = "${local.log_group}"
+  target_group_arn = "${module.lb.tg_arn}"
+
+  subnet_ids         = "${var.subnets}"
+  security_group_ids = ["${aws_security_group.app.id}"]
+  assign_public_ip   = false
 }
 
 module "lb" {
-  source = "github.com/terraform/terraform-aws-alb-single-listener?ref=cd66ca512ba34692920e25b037d5934851a7f36f"
+  source = "github.com/traveloka/terraform-aws-alb-single-listener?ref=v0.2.2"
 
   service_name   = "${local.service_name}"
-  cluster_role   = "app"
+  cluster_role   = "${local.cluster_role}"
   environment    = "${var.environment}"
   product_domain = "${local.product_domain}"
   description    = "Load balancer for ${local.service_name}"
@@ -57,7 +69,7 @@ module "lb" {
   listener_certificate_arn = "${var.certificate_arn}"
 
   tg_target_type = "ip"
-  tg_port        = "${local.service_port}"
+  tg_port        = "${local.container_port}"
 
   tg_deregistration_delay = "${local.tg_deregistration_delay}"
 
@@ -67,28 +79,51 @@ module "lb" {
   }
 
   tg_health_check {
-    port = "${local.service_port}"
+    port = "${local.container_port}"
   }
 }
 
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 4
   min_capacity       = 1
-  resource_id        = "service/${var.cluster_name}/${var.service_name}"
-  role_arn           = "-----------------------"
+  resource_id        = "service/${local.ecs_cluster_name}/${module.service.service_name}"
+  role_arn           = "arn:aws:iam::1234567890ab:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
 
-resource "aws_appautoscaling_policy" "ecs_policy" {
-  name               = "scale-down"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = "service/clusterName/serviceName"
+resource "aws_appautoscaling_policy" "request" {
+  name               = "${local.service_name}-request"
+  resource_id        = "${aws_appautoscaling_target.ecs_target.resource_id}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 
+  policy_type = "TargetTrackingScaling"
+
   target_tracking_scaling_policy_configuration {
-    target_value = ""
+    target_value = "${local.autoscaling_target_rpm}"
+
+    predefined_metric_specification {
+      predefined_metric_type = "ALBRequestCountPerTarget"
+      resource_label         = "${module.lb.lb_arn_suffix}/${module.lb.tg_arn_suffix}"
+    }
+  }
+}
+
+resource "aws_appautoscaling_policy" "cpu" {
+  name               = "${local.service_name}-cpu"
+  resource_id        = "${aws_appautoscaling_target.ecs_target.resource_id}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+
+  policy_type = "TargetTrackingScaling"
+
+  target_tracking_scaling_policy_configuration {
+    target_value = "${local.autoscaling_target_cpu}"
+
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
   }
 }
 
@@ -106,8 +141,8 @@ resource "aws_security_group_rule" "ingress_app_from_lb" {
   type                     = "ingress"
   security_group_id        = "${aws_security_group.app.id}"
   source_security_group_id = "${aws_security_group.lb.id}"
-  from_port                = "${local.service_port}"
-  to_port                  = "${local.service_port}"
+  from_port                = "${local.container_port}"
+  to_port                  = "${local.container_port}"
   protocol                 = "tcp"
 }
 
@@ -124,8 +159,8 @@ resource "aws_security_group_rule" "egress_app_from_lb" {
   type                     = "egress"
   security_group_id        = "${aws_security_group.lb.id}"
   source_security_group_id = "${aws_security_group.app.id}"
-  from_port                = "${local.service_port}"
-  to_port                  = "${local.service_port}"
+  from_port                = "${local.container_port}"
+  to_port                  = "${local.container_port}"
   protocol                 = "tcp"
 }
 
