@@ -33,6 +33,13 @@ module "taskdef_name" {
   resource_type = "ecs_task_definition"
 }
 
+module "log_group_name" {
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
+
+  name_prefix   = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}"
+  resource_type = "cloudwatch_log_group"
+}
+
 resource "aws_ecs_service" "ecs_service" {
   name          = "${module.service_name.name}"
   cluster       = "${var.ecs_cluster_arn}"
@@ -54,7 +61,7 @@ resource "aws_ecs_service" "ecs_service" {
   load_balancer {
     target_group_arn = "${var.target_group_arn}"
     container_name   = "${var.main_container_name}"
-    container_port   = "${var.container_port}"
+    container_port   = "${var.main_container_port}"
   }
 
   propagate_tags = "SERVICE"
@@ -74,7 +81,7 @@ resource "aws_ecs_task_definition" "task_def" {
   task_role_arn         = "${var.task_role_arn}"
 
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = "${var.task_execution_role_arn}"
+  execution_role_arn       = "${var.execution_role_arn}"
   network_mode             = "awsvpc"
 
   cpu    = "${var.cpu}"
@@ -95,14 +102,14 @@ data "template_file" "container_definition" {
     container_name = "${var.main_container_name}"
     image_name     = "${var.image_name}"
     version        = "${var.image_version}"
-    port           = "${var.container_port}"
+    port           = "${var.main_container_port}"
     log_group      = "${aws_cloudwatch_log_group.log_group.name}"
     environment    = "${jsonencode(var.environment_variables)}"
   }
 }
 
 resource "aws_cloudwatch_log_group" "log_group" {
-  name              = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}/${var.main_container_name}"
+  name              = "${module.log_group_name.name}"
   retention_in_days = "${var.log_retention_in_days}"
 
   tags = "${merge(local.global_tags, var.log_tags)}"

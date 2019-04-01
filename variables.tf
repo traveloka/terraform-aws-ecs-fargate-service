@@ -62,8 +62,8 @@ variable "main_container_name" {
   default     = "app"
 }
 
-variable "container_port" {
-  description = "Port for container to listen for incoming connections"
+variable "main_container_port" {
+  description = "Port for main container to listen for incoming connections"
   type        = "string"
   default     = 80
 }
@@ -108,8 +108,8 @@ variable "task_role_arn" {
   default     = ""
 }
 
-variable "task_execution_role_arn" {
-  description = "The name of the execution role that will be used by fargate to run tasks"
+variable "execution_role_arn" {
+  description = "ARN of IAM role to be used by container agent to pull container images, write logs, access ECS secrets and parameter store"
   type        = "string"
 }
 

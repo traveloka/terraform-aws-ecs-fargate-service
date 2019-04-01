@@ -33,12 +33,13 @@ module "service" {
 
   ecs_cluster_arn = "${local.ecs_cluster_name}"
 
-  capacity       = 3
-  image_name     = "${local.image_name}"
-  image_version  = "latest"
-  container_port = "${local.container_port}"
+  capacity      = 3
+  image_name    = "${local.image_name}"
+  image_version = "latest"
 
-  task_execution_role_arn = "arn:aws:iam::123456789012:role/service-role/ecs-tasks.amazonaws.com/ServiceRoleForEcs-Tasks_webdemo-execution-1b5e77c7a347fc2b"
+  main_container_port = "${local.container_port}"
+
+  execution_role_arn = "arn:aws:iam::123456789012:role/service-role/ecs-tasks.amazonaws.com/ServiceRoleForEcs-Tasks_webdemo-execution-1b5e77c7a347fc2b"
 
   cpu    = "${local.cpu}"
   memory = "${local.memory}"
