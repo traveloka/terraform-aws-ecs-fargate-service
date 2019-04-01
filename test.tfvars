@@ -24,7 +24,7 @@ security_group_ids = ["sg-00000001"]
 
 assign_public_ip = false
 
-task_execution_role_arn = "arn:aws:iam::123456789012:role/service-role/ecs-tasks.amazonaws.com/ServiceRoleForEcs-Tasks_test-execution-1b5e77c7a347fc2b"
+execution_role_arn = "arn:aws:iam::123456789012:role/service-role/ecs-tasks.amazonaws.com/ServiceRoleForEcs-Tasks_test-execution-1b5e77c7a347fc2b"
 
 image_name = "traveloka/test-app"
 
