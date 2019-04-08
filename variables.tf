@@ -1,37 +1,58 @@
 variable "service_name" {
-  description = "Name of your service which is also used to identified resources"
+  description = "Name of the ECS service. Note: this value will be also used to name resources"
   type        = "string"
 }
 
-variable "cluster_name" {
-  description = "Name of the cluster to which the service belongs"
+variable "cluster_role" {
+  description = "The role of the cluster in the service"
+  type        = "string"
+}
+
+variable "application" {
+  description = "Application type that the ASG's instances will serve"
+  type        = "string"
+}
+
+variable "product_domain" {
+  description = "The product domain that this service belongs to"
+  type        = "string"
+}
+
+variable "environment" {
+  description = "Environment where the service run"
+  type        = "string"
+  default     = "development"
+}
+
+variable "ecs_cluster_arn" {
+  description = "ARN of the ECS cluster to launch service in"
   type        = "string"
 }
 
 variable "platform_version" {
-  description = "The platform version on which to run your service."
+  description = "Version of the Fargate platform to run the service on"
   type        = "string"
   default     = "LATEST"
 }
 
 variable "capacity" {
-  description = "Number of task that will run in this service"
+  description = "Number of tasks to run in the service"
   type        = "string"
   default     = 2
 }
 
-variable "target_group" {
-  description = "ALB target group that associated with this service"
+variable "target_group_arn" {
+  description = "ARN of the ALB target group to associate with the service"
   type        = "string"
 }
 
 variable "image_name" {
-  description = "The name of docker image that will be used by this service"
+  description = "Name of the docker image that will be used by the task"
   type        = "string"
 }
 
-variable "service_version" {
-  description = "The tag of the docker version to run "
+variable "image_version" {
+  description = "Version/tag of the docker image to be used by the task"
   type        = "string"
 }
 
@@ -41,37 +62,38 @@ variable "main_container_name" {
   default     = "app"
 }
 
-variable "service_port" {
-  description = "Port on which the container app run"
+variable "main_container_port" {
+  description = "Port for main container to listen for incoming connections"
   type        = "string"
   default     = 80
 }
 
-variable "subnets" {
-  description = "The subnets associated with the service"
+variable "health_check_grace_period_seconds" {
+  description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown."
+  type        = "string"
+  default     = 0
+}
+
+variable "subnet_ids" {
+  description = "List of IDs of subnets to launch the service in"
   type        = "list"
 }
 
-variable "security_groups" {
-  description = "The security groups associated with the service"
+variable "security_group_ids" {
+  description = "List of IDs of security groups to associate with the service"
   type        = "list"
 }
 
 variable "assign_public_ip" {
-  description = "Assign a public IP address to the ENI"
+  description = "Whether or not to assign public IP address to the task ENI"
   type        = "string"
   default     = false
 }
 
-variable "log_group_name" {
-  description = "CloudWatch log group name where the service log place"
+variable "log_retention_in_days" {
+  description = "Number of days to retain service logs"
   type        = "string"
-}
-
-variable "log_retention" {
-  description = "The number of day the logs will be keept"
-  type        = "string"
-  default     = 30
+  default     = 14
 }
 
 variable "container_definition_template" {
@@ -80,32 +102,49 @@ variable "container_definition_template" {
   default     = ""
 }
 
-variable "task_role" {
-  description = "The ARN of IAM role that allows your Amazon ECS container task to make calls to other AWS services."
+variable "task_role_arn" {
+  description = "ARN of IAM role to be used by the task"
   type        = "string"
   default     = ""
 }
 
-variable "execution_role_name" {
-  description = "The name of the execution role that will be used by fargate to run tasks"
+variable "execution_role_arn" {
+  description = "ARN of IAM role to be used by container agent to pull container images, write logs, access ECS secrets and parameter store"
   type        = "string"
-  default     = "ecsTaskExecutionRole"
 }
 
-variable "environment" {
-  description = "Environment variables for the task"
+variable "environment_variables" {
+  description = "List of environment variables to pass to the task"
   type        = "list"
   default     = []
 }
 
 variable "cpu" {
-  description = "The number of cpu units used by the task."
+  description = "Number of cpu units to allocate for one task"
   type        = "string"
   default     = "1024"
 }
 
 variable "memory" {
-  description = "The amount (in MiB) of memory used by the task."
+  description = "Amount of memory (in MiB) to allocate for one task"
   type        = "string"
   default     = "1024"
+}
+
+variable "service_tags" {
+  description = "Custom tags for ECS Service"
+  type        = "map"
+  default     = {}
+}
+
+variable "taskdef_tags" {
+  description = "Custom tags for ECS Task Definition"
+  type        = "map"
+  default     = {}
+}
+
+variable "log_tags" {
+  description = "Custom tags for CloudWatch Log Group"
+  type        = "map"
+  default     = {}
 }
