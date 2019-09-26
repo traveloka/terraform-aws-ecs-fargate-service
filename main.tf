@@ -48,7 +48,8 @@ resource "aws_ecs_service" "ecs_service" {
   launch_type      = "FARGATE"
   platform_version = "${var.platform_version}"
 
-  task_definition = "${aws_ecs_task_definition.task_def.arn}"
+  # Track the latest ACTIVE revision
+  task_definition = "${aws_ecs_task_definition.task_def.family}:${max("${aws_ecs_task_definition.task_def.revision}", "${data.aws_ecs_task_definition.task_def.revision}")}"
 
   health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
@@ -70,7 +71,6 @@ resource "aws_ecs_service" "ecs_service" {
   lifecycle {
     ignore_changes = [
       "desired_count",
-      "task_definition",
     ]
   }
 }
@@ -113,4 +113,8 @@ resource "aws_cloudwatch_log_group" "log_group" {
   retention_in_days = "${var.log_retention_in_days}"
 
   tags = "${merge(local.global_tags, var.log_tags)}"
+}
+
+data "aws_ecs_task_definition" "task_def" {
+  task_definition = "${aws_ecs_task_definition.task_def.family}"
 }
