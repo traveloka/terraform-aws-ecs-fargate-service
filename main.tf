@@ -116,6 +116,6 @@ resource "aws_cloudwatch_log_group" "log_group" {
 }
 
 data "aws_ecs_task_definition" "task_def_data" {
-  depends_on = [ "aws_ecs_task_definition.task_def" ]
+  depends_on      = ["aws_ecs_task_definition.task_def"]
   task_definition = "${aws_ecs_task_definition.task_def.family}"
 }
