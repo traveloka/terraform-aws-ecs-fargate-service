@@ -49,7 +49,7 @@ resource "aws_ecs_service" "ecs_service" {
   platform_version = "${var.platform_version}"
 
   # Track the latest ACTIVE revision
-  task_definition = "${aws_ecs_task_definition.task_def.family}:${max("${aws_ecs_task_definition.task_def.revision}", "${data.aws_ecs_task_definition.task_def.revision}")}"
+  task_definition = "${aws_ecs_task_definition.task_def.family}:${max("${aws_ecs_task_definition.task_def.revision}", "${data.aws_ecs_task_definition.task_def_data.revision}")}"
 
   health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
@@ -115,6 +115,7 @@ resource "aws_cloudwatch_log_group" "log_group" {
   tags = "${merge(local.global_tags, var.log_tags)}"
 }
 
-data "aws_ecs_task_definition" "task_def" {
+data "aws_ecs_task_definition" "task_def_data" {
+  depends_on      = ["aws_ecs_task_definition.task_def"]
   task_definition = "${aws_ecs_task_definition.task_def.family}"
 }
