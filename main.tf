@@ -45,7 +45,11 @@ resource "aws_ecs_service" "ecs_service" {
   cluster       = "${var.ecs_cluster_arn}"
   desired_count = "${var.capacity}"
 
-  launch_type      = "FARGATE"
+  # Hack, so we can fill it with empty "" to prevent destroying
+  # resources with capacity_provider_strategy enabled via web console.
+  # capacity_provider_strategy is only available in aws provider > 2.42.0
+  launch_type = "${var.launch_type}"
+
   platform_version = "${var.platform_version}"
 
   # Track the latest ACTIVE revision
