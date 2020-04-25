@@ -148,3 +148,9 @@ variable "log_tags" {
   type        = "map"
   default     = {}
 }
+
+variable "launch_type" {
+  description = "The launch type on which to run your service. The valid values are \"\", EC2 and FARGATE"
+  type        = "string"
+  default     = "FARGATE"
+}
