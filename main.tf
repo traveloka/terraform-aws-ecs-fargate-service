@@ -109,6 +109,7 @@ data "template_file" "container_definition" {
     port           = "${var.main_container_port}"
     log_group      = "${aws_cloudwatch_log_group.log_group.name}"
     environment    = "${jsonencode(var.environment_variables)}"
+    product_domain = "${var.product_domain}"
   }
 }
 
