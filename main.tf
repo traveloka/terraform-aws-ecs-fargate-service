@@ -55,7 +55,8 @@ resource "aws_ecs_service" "ecs_service" {
   name          = module.service_name.name
   cluster       = var.ecs_cluster_arn
   desired_count = var.capacity
-  launch_type = "FARGATE"
+
+  launch_type = length(var.capacity_provider_strategies) > 0 ? null : "FARGATE"
 
   dynamic "capacity_provider_strategy" {
     for_each = var.capacity_provider_strategies
