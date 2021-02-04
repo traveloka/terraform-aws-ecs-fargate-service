@@ -19,24 +19,39 @@ locals {
   }
 }
 
+data "template_file" "container_definitions" {
+  template = file("${path.module}/templates/container-definition.json.tpl")
+
+  vars = {
+    aws_region     = "${data.aws_region.current.name}"
+    container_name = "${var.main_container_name}"
+    image_name     = "${var.image_name}"
+    version        = "${var.image_version}"
+    port           = "${var.main_container_port}"
+    log_group      = "${aws_cloudwatch_log_group.log_group.name}"
+    environment    = "${jsonencode(var.environment_variables)}"
+    docker_labels  = "${jsonencode({})}"
+  }
+}
+
 module "service_name" {
-  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.19.1"
 
   name_prefix   = "${local.cluster}"
   resource_type = "ecs_service"
 }
 
 module "taskdef_name" {
-  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.19.1"
 
   name_prefix   = "${local.cluster}"
   resource_type = "ecs_task_definition"
 }
 
 module "log_group_name" {
-  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
+  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.19.1"
 
-  name_prefix   = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}/ecs"
+  name_prefix   = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}"
   resource_type = "cloudwatch_log_group"
 }
 
@@ -54,9 +69,11 @@ resource "aws_ecs_service" "ecs_service" {
   task_definition                   = "${aws_ecs_task_definition.task_def.arn}"
   health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
+  enable_ecs_managed_tags = true
+
   network_configuration {
-    subnets          = ["${var.subnet_ids}"]
-    security_groups  = ["${var.security_group_ids}"]
+    subnets          = "${var.subnet_ids}"
+    security_groups  = "${var.security_group_ids}"
     assign_public_ip = "${var.assign_public_ip}"
   }
 
@@ -75,17 +92,18 @@ resource "aws_ecs_service" "ecs_service" {
 
   lifecycle {
     ignore_changes = [
-      "task_definition",
-      "load_balancer",
       "desired_count",
+      "load_balancer",
+      # "load_balancer.target_group_arn",
       "platform_version",
+      "task_definition",
     ]
   }
 }
 
 resource "aws_ecs_task_definition" "task_def" {
   family                = "${module.taskdef_name.name}"
-  container_definitions = "${data.template_file.container_definition.rendered}"
+  container_definitions = "${var.container_definitions != "" ? var.container_definitions : data.template_file.container_definitions.rendered}"
   task_role_arn         = "${var.task_role_arn}"
 
   requires_compatibilities = ["FARGATE"]
@@ -99,20 +117,6 @@ resource "aws_ecs_task_definition" "task_def" {
 
   lifecycle {
     create_before_destroy = true
-  }
-}
-
-data "template_file" "container_definition" {
-  template = "${var.container_definition_template}"
-
-  vars {
-    aws_region     = "${data.aws_region.current.name}"
-    container_name = "${var.main_container_name}"
-    image_name     = "${var.image_name}"
-    version        = "${var.image_version}"
-    port           = "${var.main_container_port}"
-    log_group      = "${aws_cloudwatch_log_group.log_group.name}"
-    environment    = "${jsonencode(var.environment_variables)}"
   }
 }
 

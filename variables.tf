@@ -96,8 +96,8 @@ variable "log_retention_in_days" {
   default     = 14
 }
 
-variable "container_definition_template" {
-  description = "Custom container definition template"
+variable "container_definitions" {
+  description = "The container definitions block for the task definition"
   type        = "string"
   default     = ""
 }
@@ -158,5 +158,5 @@ variable "launch_type" {
 variable "deployment_controller" {
   description = "Type of deployment controller. Valid values: CODE_DEPLOY, ECS, EXTERNAL."
   type        = "string"
-  default     = "ECS"
+  default     = "CODE_DEPLOY"
 }
