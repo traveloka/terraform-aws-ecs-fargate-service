@@ -7,7 +7,7 @@ locals {
     Application   = "${var.application}"
     ProductDomain = "${var.product_domain}"
     Environment   = "${var.environment}"
-    ManagedBy     = "Terraform"
+    ManagedBy     = "terraform"
   }
 
   service_tags = {
@@ -36,7 +36,7 @@ module "taskdef_name" {
 module "log_group_name" {
   source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.11.0"
 
-  name_prefix   = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}"
+  name_prefix   = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}/ecs"
   resource_type = "cloudwatch_log_group"
 }
 
@@ -50,11 +50,8 @@ resource "aws_ecs_service" "ecs_service" {
   # capacity_provider_strategy is only available in aws provider > 2.42.0
   launch_type = "${var.launch_type}"
 
-  platform_version = "${var.platform_version}"
-
-  # Track the latest ACTIVE revision
-  task_definition = "${aws_ecs_task_definition.task_def.family}:${max("${aws_ecs_task_definition.task_def.revision}", "${data.aws_ecs_task_definition.task_def_data.revision}")}"
-
+  platform_version                  = "${var.platform_version}"
+  task_definition                   = "${aws_ecs_task_definition.task_def.arn}"
   health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
   network_configuration {
@@ -69,12 +66,19 @@ resource "aws_ecs_service" "ecs_service" {
     container_port   = "${var.main_container_port}"
   }
 
+  deployment_controller {
+    type = "${var.deployment_controller}"
+  }
+
   propagate_tags = "SERVICE"
   tags           = "${merge(local.global_tags, local.service_tags, var.service_tags)}"
 
   lifecycle {
     ignore_changes = [
+      "task_definition",
+      "load_balancer",
       "desired_count",
+      "platform_version",
     ]
   }
 }
@@ -99,7 +103,7 @@ resource "aws_ecs_task_definition" "task_def" {
 }
 
 data "template_file" "container_definition" {
-  template = "${var.container_definition_template != "" ? var.container_definition_template : file("${path.module}/templates/container-definition.json.tpl")}"
+  template = "${var.container_definition_template}"
 
   vars {
     aws_region     = "${data.aws_region.current.name}"
@@ -109,7 +113,6 @@ data "template_file" "container_definition" {
     port           = "${var.main_container_port}"
     log_group      = "${aws_cloudwatch_log_group.log_group.name}"
     environment    = "${jsonencode(var.environment_variables)}"
-    product_domain = "${var.product_domain}"
   }
 }
 
@@ -118,9 +121,4 @@ resource "aws_cloudwatch_log_group" "log_group" {
   retention_in_days = "${var.log_retention_in_days}"
 
   tags = "${merge(local.global_tags, var.log_tags)}"
-}
-
-data "aws_ecs_task_definition" "task_def_data" {
-  depends_on      = ["aws_ecs_task_definition.task_def"]
-  task_definition = "${aws_ecs_task_definition.task_def.family}"
 }
