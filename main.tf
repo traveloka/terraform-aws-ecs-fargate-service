@@ -93,8 +93,7 @@ resource "aws_ecs_service" "ecs_service" {
   lifecycle {
     ignore_changes = [
       "desired_count",
-      "load_balancer",
-      # "load_balancer.target_group_arn",
+      "load_balancer.0.target_group_arn",
       "platform_version",
       "task_definition",
     ]
