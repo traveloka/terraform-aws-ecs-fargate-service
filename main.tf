@@ -19,21 +19,6 @@ locals {
   }
 }
 
-data "template_file" "container_definitions" {
-  template = file("${path.module}/templates/container-definition.json.tpl")
-
-  vars = {
-    aws_region     = "${data.aws_region.current.name}"
-    container_name = "${var.main_container_name}"
-    image_name     = "${var.image_name}"
-    version        = "${var.image_version}"
-    port           = "${var.main_container_port}"
-    log_group      = "${aws_cloudwatch_log_group.log_group.name}"
-    environment    = "${jsonencode(var.environment_variables)}"
-    docker_labels  = "${jsonencode({})}"
-  }
-}
-
 module "service_name" {
   source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.19.1"
 
@@ -93,7 +78,7 @@ resource "aws_ecs_service" "ecs_service" {
   lifecycle {
     ignore_changes = [
       "desired_count",
-      "load_balancer.0.target_group_arn",
+      "load_balancer", # https://github.com/hashicorp/terraform-provider-aws/issues/13192
       "platform_version",
       "task_definition",
     ]
@@ -102,7 +87,7 @@ resource "aws_ecs_service" "ecs_service" {
 
 resource "aws_ecs_task_definition" "task_def" {
   family                = "${module.taskdef_name.name}"
-  container_definitions = "${var.container_definitions != "" ? var.container_definitions : data.template_file.container_definitions.rendered}"
+  container_definitions = "${var.container_definitions}"
   task_role_arn         = "${var.task_role_arn}"
 
   requires_compatibilities = ["FARGATE"]

@@ -49,11 +49,13 @@ variable "target_group_arn" {
 variable "image_name" {
   description = "Name of the docker image that will be used by the task"
   type        = "string"
+  default     = ""
 }
 
 variable "image_version" {
   description = "Version/tag of the docker image to be used by the task"
   type        = "string"
+  default     = ""
 }
 
 variable "main_container_name" {
@@ -71,7 +73,7 @@ variable "main_container_port" {
 variable "health_check_grace_period_seconds" {
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown."
   type        = "string"
-  default     = 0
+  default     = 60
 }
 
 variable "subnet_ids" {
@@ -99,7 +101,6 @@ variable "log_retention_in_days" {
 variable "container_definitions" {
   description = "The container definitions block for the task definition"
   type        = "string"
-  default     = ""
 }
 
 variable "task_role_arn" {
