@@ -21,7 +21,6 @@ variable "product_domain" {
 variable "environment" {
   description = "Environment where the service run"
   type        = "string"
-  default     = "development"
 }
 
 variable "ecs_cluster_arn" {
@@ -44,18 +43,6 @@ variable "capacity" {
 variable "target_group_arn" {
   description = "ARN of the ALB target group to associate with the service"
   type        = "string"
-}
-
-variable "image_name" {
-  description = "Name of the docker image that will be used by the task"
-  type        = "string"
-  default     = ""
-}
-
-variable "image_version" {
-  description = "Version/tag of the docker image to be used by the task"
-  type        = "string"
-  default     = ""
 }
 
 variable "main_container_name" {
@@ -90,12 +77,6 @@ variable "assign_public_ip" {
   description = "Whether or not to assign public IP address to the task ENI"
   type        = "string"
   default     = false
-}
-
-variable "log_retention_in_days" {
-  description = "Number of days to retain service logs"
-  type        = "string"
-  default     = 14
 }
 
 variable "container_definitions" {
@@ -144,20 +125,8 @@ variable "taskdef_tags" {
   default     = {}
 }
 
-variable "log_tags" {
-  description = "Custom tags for CloudWatch Log Group"
-  type        = "map"
-  default     = {}
-}
-
 variable "launch_type" {
   description = "The launch type on which to run your service. The valid values are \"\", EC2 and FARGATE"
   type        = "string"
   default     = "FARGATE"
-}
-
-variable "deployment_controller" {
-  description = "Type of deployment controller. Valid values: CODE_DEPLOY, ECS, EXTERNAL."
-  type        = "string"
-  default     = "CODE_DEPLOY"
 }

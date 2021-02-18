@@ -33,21 +33,11 @@ module "taskdef_name" {
   resource_type = "ecs_task_definition"
 }
 
-module "log_group_name" {
-  source = "github.com/traveloka/terraform-aws-resource-naming?ref=v0.19.1"
-
-  name_prefix   = "/tvlk/${var.cluster_role}-${var.application}/${var.service_name}"
-  resource_type = "cloudwatch_log_group"
-}
-
 resource "aws_ecs_service" "ecs_service" {
   name          = "${module.service_name.name}"
   cluster       = "${var.ecs_cluster_arn}"
   desired_count = "${var.capacity}"
 
-  # Hack, so we can fill it with empty "" to prevent destroying
-  # resources with capacity_provider_strategy enabled via web console.
-  # capacity_provider_strategy is only available in aws provider > 2.42.0
   launch_type = "${var.launch_type}"
 
   platform_version                  = "${var.platform_version}"
@@ -69,7 +59,7 @@ resource "aws_ecs_service" "ecs_service" {
   }
 
   deployment_controller {
-    type = "${var.deployment_controller}"
+    type = "CODE_DEPLOY"
   }
 
   propagate_tags = "SERVICE"
@@ -102,11 +92,4 @@ resource "aws_ecs_task_definition" "task_def" {
   lifecycle {
     create_before_destroy = true
   }
-}
-
-resource "aws_cloudwatch_log_group" "log_group" {
-  name              = "${module.log_group_name.name}"
-  retention_in_days = "${var.log_retention_in_days}"
-
-  tags = "${merge(local.global_tags, var.log_tags)}"
 }
