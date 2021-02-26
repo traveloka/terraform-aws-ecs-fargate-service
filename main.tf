@@ -59,7 +59,7 @@ resource "aws_ecs_service" "ecs_service" {
   }
 
   deployment_controller {
-    type = "CODE_DEPLOY"
+    type = "${var.deployment_controller}"
   }
 
   propagate_tags = "SERVICE"

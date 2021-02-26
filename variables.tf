@@ -130,3 +130,9 @@ variable "launch_type" {
   type        = "string"
   default     = "FARGATE"
 }
+
+variable "deployment_controller" {
+  description = "Type of deployment controller. Valid values: CODE_DEPLOY, ECS, EXTERNAL."
+  type        = "string"
+  default     = "CODE_DEPLOY"
+}
