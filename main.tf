@@ -46,6 +46,8 @@ resource "aws_ecs_service" "ecs_service" {
 
   enable_ecs_managed_tags = true
 
+  enable_execute_command = true
+
   network_configuration {
     subnets          = "${var.subnet_ids}"
     security_groups  = "${var.security_group_ids}"
