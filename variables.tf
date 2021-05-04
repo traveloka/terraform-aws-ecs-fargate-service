@@ -57,7 +57,7 @@ variable "image_version" {
 }
 
 variable "use_latest_task_definition" {
-  description = "Wether to always use latest task definition. Set it to false if you have external release tool"
+  description = "Whether to always use latest task definition. Set it to false if you have external release tool"
   type        = bool
   default     = true
 }
