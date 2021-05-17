@@ -44,9 +44,9 @@ resource "aws_ecs_service" "ecs_service" {
   task_definition                   = "${aws_ecs_task_definition.task_def.arn}"
   health_check_grace_period_seconds = "${var.health_check_grace_period_seconds}"
 
-  enable_ecs_managed_tags = true
+  enable_ecs_managed_tags = var.enable_ecs_managed_tags
 
-  enable_execute_command = true
+  enable_execute_command = var.enable_execute_command
 
   network_configuration {
     subnets          = "${var.subnet_ids}"

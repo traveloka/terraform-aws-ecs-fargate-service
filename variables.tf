@@ -136,3 +136,15 @@ variable "deployment_controller" {
   type        = "string"
   default     = "CODE_DEPLOY"
 }
+
+variable "enable_ecs_managed_tags" {
+  description = "When you enable Amazon ECS-managed tags, Amazon ECS automatically tags all newly launched tasks with the cluster name. For tasks that belong to a service, they are also tagged with the service name. "
+  type        = bool
+  default     = true
+}
+
+variable "enable_execute_command" {
+  description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service."
+  type        = bool
+  default     = true
+}
