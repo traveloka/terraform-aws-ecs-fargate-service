@@ -1,139 +1,139 @@
 variable "service_name" {
   description = "Name of the ECS service. Note: this value will be also used to name resources"
-  type        = "string"
+  type        = string
 }
 
 variable "cluster_role" {
   description = "The role of the cluster in the service"
-  type        = "string"
+  type        = string
 }
 
 variable "application" {
   description = "Application type that the ASG's instances will serve"
-  type        = "string"
+  type        = string
 }
 
 variable "product_domain" {
   description = "The product domain that this service belongs to"
-  type        = "string"
+  type        = string
 }
 
 variable "environment" {
   description = "Environment where the service run"
-  type        = "string"
+  type        = string
 }
 
 variable "ecs_cluster_arn" {
   description = "ARN of the ECS cluster to launch service in"
-  type        = "string"
+  type        = string
 }
 
 variable "platform_version" {
   description = "Version of the Fargate platform to run the service on"
-  type        = "string"
+  type        = string
   default     = "LATEST"
 }
 
 variable "capacity" {
   description = "Number of tasks to run in the service"
-  type        = "string"
+  type        = string
   default     = 2
 }
 
 variable "target_group_arn" {
   description = "ARN of the ALB target group to associate with the service"
-  type        = "string"
+  type        = string
 }
 
 variable "main_container_name" {
   description = "Name of the container name that will be registered to target group"
-  type        = "string"
+  type        = string
   default     = "app"
 }
 
 variable "main_container_port" {
   description = "Port for main container to listen for incoming connections"
-  type        = "string"
+  type        = string
   default     = 80
 }
 
 variable "health_check_grace_period_seconds" {
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown."
-  type        = "string"
+  type        = string
   default     = 60
 }
 
 variable "subnet_ids" {
   description = "List of IDs of subnets to launch the service in"
-  type        = "list"
+  type        = list
 }
 
 variable "security_group_ids" {
   description = "List of IDs of security groups to associate with the service"
-  type        = "list"
+  type        = list
 }
 
 variable "assign_public_ip" {
   description = "Whether or not to assign public IP address to the task ENI"
-  type        = "string"
+  type        = string
   default     = false
 }
 
 variable "container_definitions" {
   description = "The container definitions block for the task definition"
-  type        = "string"
+  type        = string
 }
 
 variable "task_role_arn" {
   description = "ARN of IAM role to be used by the task"
-  type        = "string"
+  type        = string
   default     = ""
 }
 
 variable "execution_role_arn" {
   description = "ARN of IAM role to be used by container agent to pull container images, write logs, access ECS secrets and parameter store"
-  type        = "string"
+  type        = string
 }
 
 variable "environment_variables" {
   description = "List of environment variables to pass to the task"
-  type        = "list"
+  type        = list
   default     = []
 }
 
 variable "cpu" {
   description = "Number of cpu units to allocate for one task"
-  type        = "string"
+  type        = string
   default     = "1024"
 }
 
 variable "memory" {
   description = "Amount of memory (in MiB) to allocate for one task"
-  type        = "string"
+  type        = string
   default     = "1024"
 }
 
 variable "service_tags" {
   description = "Custom tags for ECS Service"
-  type        = "map"
+  type        = map
   default     = {}
 }
 
 variable "taskdef_tags" {
   description = "Custom tags for ECS Task Definition"
-  type        = "map"
+  type        = map
   default     = {}
 }
 
 variable "launch_type" {
   description = "The launch type on which to run your service. The valid values are \"\", EC2 and FARGATE"
-  type        = "string"
+  type        = string
   default     = "FARGATE"
 }
 
 variable "deployment_controller" {
   description = "Type of deployment controller. Valid values: CODE_DEPLOY, ECS, EXTERNAL."
-  type        = "string"
+  type        = string
   default     = "CODE_DEPLOY"
 }
 
