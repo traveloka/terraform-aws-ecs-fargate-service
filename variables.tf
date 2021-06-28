@@ -62,6 +62,12 @@ variable "use_latest_task_definition" {
   default     = true
 }
 
+variable "enable_execute_command" {
+  description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service"
+  type        = bool
+  default     = false
+} 
+
 variable "main_container_name" {
   description = "Name of the container name that will be registered to target group"
   type        = string

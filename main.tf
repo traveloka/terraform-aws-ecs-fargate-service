@@ -72,6 +72,7 @@ resource "aws_ecs_service" "ecs_service" {
   task_definition = aws_ecs_task_definition.task_def.family
 
   health_check_grace_period_seconds = var.health_check_grace_period_seconds
+  enable_execute_command = var.enable_execute_command
 
   network_configuration {
     subnets          = var.subnet_ids
